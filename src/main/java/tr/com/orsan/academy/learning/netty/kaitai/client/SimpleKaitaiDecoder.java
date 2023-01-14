@@ -22,7 +22,8 @@ public class SimpleKaitaiDecoder extends ByteToMessageDecoder { // (1)
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        logger.error("Exception :", cause);
+        //cause.printStackTrace();
         ctx.close();
     }
 
