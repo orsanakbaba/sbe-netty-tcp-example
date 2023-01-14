@@ -1,10 +1,12 @@
 package tr.com.orsan.academy.learning.netty.kaitai.client;
 
+import io.kaitai.struct.ByteBufferKaitaiStream;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tr.com.orsan.academy.learning.netty.kaitai.protocol.KaitaiNettyTcpExample;
 
 import java.util.List;
 
@@ -15,11 +17,7 @@ public class SimpleKaitaiDecoder extends ByteToMessageDecoder { // (1)
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) { // (2)
-        if (in.readableBytes() < 4) {
-            return; // (3)
-        }
-
-        out.add(in.readBytes(4)); // (4)
+        KaitaiNettyTcpExample exampleDecoder = new KaitaiNettyTcpExample(new ByteBufferKaitaiStream(in.nioBuffer()));
     }
 
     @Override
