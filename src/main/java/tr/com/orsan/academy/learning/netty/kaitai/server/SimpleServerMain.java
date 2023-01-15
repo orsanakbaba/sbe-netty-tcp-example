@@ -15,6 +15,8 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
     private int port;
     private int[][] myInputArr;
 
+    //private KaitaiNettyTcpExample kaitaiNettyTcpExample = new KaitaiNettyTcpExample(new ByteBufferKaitaiStream());
+
     public SimpleServerMain(int port, int numbRow, int numbColumn) {
         this.port = port;
         this.myInputArr = new int[numbRow][numbColumn];
@@ -29,13 +31,13 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
     public static void printMyArray(int[][] ints, int numbRow, int numbColumn) {
         for (int i = 0; i < numbRow; i++) {
             for (int j = 0; j < numbColumn; j++) {
-                System.out.print(ints[i][j] + ((j == numbColumn - 1 ? "\n" : ((j != numbColumn - 1) ? "," : ""))));
+                logger.debug(ints[i][j] + ((j == numbColumn - 1 ? "\n" : ((j != numbColumn - 1) ? "," : ""))));
             }
         }
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 8080;
+        int port = 51444;
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         }
@@ -56,6 +58,19 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
                 ctx.close();
             }
         }); // (4)
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) { // (2)
+        // Discard the received data silently.
+        ((ByteBuf) msg).release(); // (3)
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
+        // Close the connection when an exception is raised.
+        cause.printStackTrace();
+        ctx.close();
     }
 
     public void run() throws Exception {

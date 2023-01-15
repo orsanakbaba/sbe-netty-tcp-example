@@ -9,7 +9,7 @@ seq:
   - id: footer
     type: msg_footer_type
 types:
-  msg_header_ype:
+  msg_header_type:
     seq:
       - id: preamble
         contents: [ 0x5F,0x24,0x7B,0x11,0x5F ]
