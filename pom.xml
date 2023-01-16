@@ -112,48 +112,62 @@
                         <goals>
                             <goal>java</goal>
                         </goals>
-                        <configuration>
-                            <executableDependency>
-                                <groupId>uk.co.real-logic</groupId>
-                                <artifactId>sbe-all</artifactId>
-                            </executableDependency>
-                            <mainClass>uk.co.real_logic.sbe.SbeTool</mainClass>
-                            <arguments>
-                                <argument>${project.basedir}/src/main/resources/sbe/example-schema.xml</argument>
-                            </arguments>
-                            <sourceRoot>${project.build.directory}/sbe/generated-sources/</sourceRoot>
-                            <cleanupDaemonThreads>true</cleanupDaemonThreads>
-                            <stopUnresponsiveDaemonThreads>true</stopUnresponsiveDaemonThreads>
-                            <daemonThreadJoinTimeout>8000</daemonThreadJoinTimeout>
-                            <systemProperties>
-                                <systemProperty>
-                                    <key>sbe.output.dir</key>
-                                    <value>${project.build.directory}/sbe/generated-sources/</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <key>sbe.target.namespace</key>
-                                    <value>${project.groupId}.messages</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <key>sbe.decode.unknown.enum.values</key>
-                                    <value>true</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <key>sbe.xinclude.aware</key>
-                                    <value>true</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <key>sbe.generate.ir</key>
-                                    <value>false</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <key>sbe.target.language</key>
-                                    <value>Java</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
+
                     </execution>
+
                 </executions>
+                <configuration>
+                    <executableDependency>
+                        <groupId>uk.co.real-logic</groupId>
+                        <artifactId>sbe-all</artifactId>
+                    </executableDependency>
+                    <mainClass>uk.co.real_logic.sbe.SbeTool</mainClass>
+                    <arguments>
+                        <argument>${project.basedir}/src/main/resources/sbe/example-schema.xml</argument>
+                    </arguments>
+                    <sourceRoot>${project.build.directory}/sbe/generated-sources/</sourceRoot>
+                    <cleanupDaemonThreads>true</cleanupDaemonThreads>
+                    <stopUnresponsiveDaemonThreads>true</stopUnresponsiveDaemonThreads>
+                    <daemonThreadJoinTimeout>8000</daemonThreadJoinTimeout>
+                    <systemProperties>
+                        <systemProperty>
+                            <key>sbe.output.dir</key>
+                            <value>${project.build.directory}/sbe/generated-sources/</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.target.namespace</key>
+                            <value>${project.groupId}.messages</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.decode.unknown.enum.values</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.xinclude.aware</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.generate.ir</key>
+                            <value>false</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.target.language</key>
+                            <value>Java</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.validation.stop.on.error</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.validation.warnings.fatal</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.validation.suppress.output</key>
+                            <value>true</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
 
             </plugin>
 
