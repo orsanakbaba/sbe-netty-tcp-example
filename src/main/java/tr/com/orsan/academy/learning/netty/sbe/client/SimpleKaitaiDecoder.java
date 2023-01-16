@@ -1,4 +1,4 @@
-package tr.com.orsan.academy.learning.netty.kaitai.client;
+package tr.com.orsan.academy.learning.netty.sbe.client;
 
 import io.kaitai.struct.ByteBufferKaitaiStream;
 import io.netty.buffer.ByteBuf;
@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tr.com.orsan.academy.learning.netty.kaitai.protocol.KaitaiNettyTcpExample;
+import tr.com.orsan.academy.learning.netty.sbe.protocol.KaitaiNettyTcpExample;
 
 import java.util.List;
 

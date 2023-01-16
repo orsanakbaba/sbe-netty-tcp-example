@@ -1,4 +1,4 @@
-package tr.com.orsan.academy.learning.netty.kaitai.server;
+package tr.com.orsan.academy.learning.netty.sbe.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;

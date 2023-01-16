@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tr.com.orsan.akademi.learning.netty.kaitai</groupId>
-    <artifactId>kaitai-netty-tcp-example</artifactId>
+    <groupId>tr.com.orsan.akademi.learning.netty.sbe</groupId>
+    <artifactId>sbe-netty-tcp-example</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -58,7 +58,7 @@
                         https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.10/kaitai-struct-compiler-0.10.zip
                     </url>
                     <overwrite>true</overwrite>
-                    <packageName>tr.com.orsan.academy.learning.netty.kaitai.protocol</packageName>
+                    <packageName>tr.com.orsan.academy.learning.netty.sbe.protocol</packageName>
                     <output>${project.build.directory}/generated-sources/</output>
                 </configuration>
                 <executions>
@@ -142,6 +142,10 @@
                         <systemProperty>
                             <key>sbe.generate.ir</key>
                             <value>false</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.target.language</key>
+                            <value>Java</value>
                         </systemProperty>
 
                     </systemProperties>
