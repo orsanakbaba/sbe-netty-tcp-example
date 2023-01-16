@@ -3,7 +3,7 @@ meta:
   endian: be
 seq:
   - id: header
-    type: msg_header_ype
+    type: msg_header_type
   - id: body
     type: msg_body_type
   - id: footer

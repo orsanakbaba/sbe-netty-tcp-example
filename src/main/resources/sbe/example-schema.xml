@@ -3,8 +3,8 @@
                    xmlns:xi="http://www.w3.org/2001/XInclude"
                    package="tr.com.orsan.academy.learning.netty.sbe.messages"
                    id="1"
-                   version="0"
-                   semanticVersion="5.2"
+                   version="1"
+                   semanticVersion="1.0"
                    description="Example base schema which can be extended."
                    byteOrder="littleEndian">
     <xi:include href="common-types.xml"/>
