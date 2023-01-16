@@ -12,6 +12,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <SBE_LIB_VERSION>1.27.0</SBE_LIB_VERSION>
     </properties>
 
     <dependencies>
@@ -39,13 +40,16 @@
             <version>2.13.0</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>uk.co.real-logic</groupId>
+            <artifactId>sbe-all</artifactId>
+            <version>${SBE_LIB_VERSION}</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-
                 <groupId>name.valery1707.kaitai</groupId>
                 <artifactId>kaitai-maven-plugin</artifactId>
                 <version>0.1.6</version>
@@ -66,6 +70,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -94,7 +99,53 @@
                             </sources>
                         </configuration>
                     </execution>
+
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.co.real-logic</groupId>
+                        <artifactId>sbe-all</artifactId>
+                        <version>${SBE_LIB_VERSION}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executableDependency>
+                        <groupId>uk.co.real-logic</groupId>
+                        <artifactId>sbe-all</artifactId>
+                    </executableDependency>
+                    <mainClass>uk.co.real_logic.sbe.SbeTool</mainClass>
+                    <arguments>
+                        <argument>${project.basedir}/src/main/resources/sbe/example-schema.xml</argument>
+                    </arguments>
+                    <sourceRoot>${project.build.directory}/generated-sources/sbe/</sourceRoot>
+                    <systemProperties>
+                        <systemProperty>
+                            <key>sbe.output.dir</key>
+                            <value>${project.build.directory}/generated-sources/sbe/</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.xinclude.aware</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.generate.ir</key>
+                            <value>false</value>
+                        </systemProperty>
+
+                    </systemProperties>
+                </configuration>
             </plugin>
 
 
