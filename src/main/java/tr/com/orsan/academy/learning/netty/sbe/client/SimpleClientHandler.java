@@ -1,4 +1,4 @@
-package tr.com.orsan.academy.learning.netty.kaitai.client;
+package tr.com.orsan.academy.learning.netty.sbe.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

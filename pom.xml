@@ -4,15 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tr.com.orsan.akademi.learning.netty.kaitai</groupId>
-    <artifactId>kaitai-netty-tcp-example</artifactId>
+    <groupId>tr.com.orsan.academy.learning.netty.sbe</groupId>
+    <artifactId>sbe-netty-tcp-example</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <SBE_LIB_VERSION>1.27.0</SBE_LIB_VERSION>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>
@@ -29,36 +31,153 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.19.0</version>
+            <version>2.13.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.13.0</version>
+            <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>uk.co.real-logic</groupId>
+            <artifactId>sbe-all</artifactId>
+            <version>${SBE_LIB_VERSION}</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-
                 <groupId>name.valery1707.kaitai</groupId>
                 <artifactId>kaitai-maven-plugin</artifactId>
                 <version>0.1.6</version>
-
+                <configuration>
+                    <url>
+                        https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.10/kaitai-struct-compiler-0.10.zip
+                    </url>
+                    <overwrite>true</overwrite>
+                    <packageName>tr.com.orsan.academy.learning.netty.kaitai.protocol</packageName>
+                    <output>${project.build.directory}/kaitai/generated-sources/</output>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.5.0</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>2.10.0</version>
+                <version>2.14.0</version>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/sbe/generated-sources/</source>
+                                <source>${project.build.directory}/kaitai/generated-sources/</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+
+                    </execution>
+
+                </executions>
+                <configuration>
+                    <executableDependency>
+                        <groupId>uk.co.real-logic</groupId>
+                        <artifactId>sbe-all</artifactId>
+                    </executableDependency>
+                    <mainClass>uk.co.real_logic.sbe.SbeTool</mainClass>
+                    <arguments>
+                        <argument>${project.basedir}/src/main/resources/sbe/example-schema.xml</argument>
+                    </arguments>
+                    <sourceRoot>${project.build.directory}/sbe/generated-sources/</sourceRoot>
+                    <cleanupDaemonThreads>true</cleanupDaemonThreads>
+                    <stopUnresponsiveDaemonThreads>true</stopUnresponsiveDaemonThreads>
+                    <daemonThreadJoinTimeout>8000</daemonThreadJoinTimeout>
+                    <systemProperties>
+                        <systemProperty>
+                            <key>sbe.output.dir</key>
+                            <value>${project.build.directory}/sbe/generated-sources/</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.target.namespace</key>
+                            <value>${project.groupId}.messages</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.decode.unknown.enum.values</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.xinclude.aware</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.generate.ir</key>
+                            <value>false</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.target.language</key>
+                            <value>Java</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.validation.stop.on.error</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.validation.warnings.fatal</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>sbe.validation.suppress.output</key>
+                            <value>true</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
+
+            </plugin>
+
+
         </plugins>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
     </build>
     <pluginRepositories>
         <pluginRepository>
