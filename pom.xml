@@ -106,15 +106,20 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.co.real-logic</groupId>
+                        <artifactId>sbe-all</artifactId>
+                        <version>${SBE_LIB_VERSION}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
-
                     </execution>
-
                 </executions>
                 <configuration>
                     <executableDependency>
@@ -168,10 +173,7 @@
                         </systemProperty>
                     </systemProperties>
                 </configuration>
-
             </plugin>
-
-
         </plugins>
         <resources>
             <resource>
