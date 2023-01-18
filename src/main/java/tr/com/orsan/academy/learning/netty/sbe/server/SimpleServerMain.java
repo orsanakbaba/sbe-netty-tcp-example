@@ -128,7 +128,7 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
 
             // Bind and start to accept incoming connections.
 
-            ChannelFuture f = b.bind(this.port).sync(); // (7)
+            ChannelFuture f = b.bind("localhost", this.port).sync(); // (7)
 
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
