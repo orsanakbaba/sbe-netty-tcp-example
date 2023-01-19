@@ -1,44 +1,24 @@
 package tr.com.orsan.academy.learning.netty.sbe.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.agrona.concurrent.UnsafeBuffer;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tr.com.orsan.academy.learning.netty.sbe.messages.*;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleServerMain extends ChannelInboundHandlerAdapter {
-    private static final String ENCODING_FILENAME = "sbe.encoding.filename";
-    private static final byte[] VEHICLE_CODE;
-    private static final byte[] MANUFACTURER_CODE;
-    private static final byte[] MANUFACTURER;
-    private static final byte[] MODEL;
-    private static final UnsafeBuffer ACTIVATION_CODE;
-
-    static {
-        try {
-            VEHICLE_CODE = "abcdef".getBytes(CarEncoder.vehicleCodeCharacterEncoding());
-            MANUFACTURER_CODE = "123".getBytes(EngineEncoder.manufacturerCodeCharacterEncoding());
-            MANUFACTURER = "Honda".getBytes(CarEncoder.manufacturerCharacterEncoding());
-            MODEL = "Civic VTi".getBytes(CarEncoder.modelCharacterEncoding());
-            ACTIVATION_CODE = new UnsafeBuffer("abcdef".getBytes(CarEncoder.activationCodeCharacterEncoding()));
-        } catch (final UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
 
     private static final Logger logger = LogManager.getLogger(SimpleServerMain.class);
     private int port;
     private int[][] myInputArr;
+    static final List<Channel> channels = new ArrayList<Channel>();
 
 
     public SimpleServerMain(int port, int numbRow, int numbColumn) {
@@ -51,7 +31,6 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
         }
         printMyArray(this.myInputArr, numbRow, numbColumn);
     }
-
     public static void printMyArray(int[][] ints, int numbRow, int numbColumn) {
         for (int i = 0; i < numbRow; i++) {
             for (int j = 0; j < numbColumn; j++) {
@@ -59,7 +38,6 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
             }
         }
     }
-
     public static void main(String[] args) throws Exception {
         int port = 51444;
         if (args.length > 0) {
@@ -69,23 +47,16 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
         new SimpleServerMain(port, 10, 10).run();
     }
 
-
     @Override
     public void channelActive(final ChannelHandlerContext ctx) { // (1)
-        final ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
-        final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
 
-        final MessageHeaderDecoder messageHeaderDecoder = new MessageHeaderDecoder();
-        final MessageHeaderEncoder messageHeaderEncoder = new MessageHeaderEncoder();
-        final CarDecoder carDecoder = new CarDecoder();
-        final CarEncoder carEncoder = new CarEncoder();
+        logger.debug("Client joined - " + ctx);
+        channels.add(ctx.channel());
+    }
 
-        final int encodingLengthPlusHeader = encode(carEncoder, directBuffer, messageHeaderEncoder);
-
-        final ByteBuf nettyBuffer = ctx.alloc().buffer(encodingLengthPlusHeader); // (2)
-
-        byteBuffer.limit(encodingLengthPlusHeader);
-        nettyBuffer.writeBytes(byteBuffer);
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) { // (2)
+        /*final ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
 
         final ChannelFuture f = ctx.writeAndFlush(nettyBuffer); // (3)
         f.addListener(new ChannelFutureListener() {
@@ -95,12 +66,14 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
                 ctx.close();
             }
         }); // (4)
+        //((ByteBuf) msg).release(); // (3)
+         */
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) { // (2)
-        // Discard the received data silently.
-        ((ByteBuf) msg).release(); // (3)
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        super.channelReadComplete(ctx);
+        ctx.flush();
     }
 
     @Override
@@ -120,15 +93,18 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
                     .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(this);
+                            ch.pipeline().addLast(new SimpleNettySbeDecoder())
+                                    .addLast(this);
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)          // (5)
+                    .handler(new LoggingHandler(LogLevel.INFO))
                     .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 
             // Bind and start to accept incoming connections.
 
             ChannelFuture f = b.bind("localhost", this.port).sync(); // (7)
+            logger.debug("Netty Server started.");
 
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
@@ -141,56 +117,6 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
     }
 
 
-    int encode(
-            final CarEncoder car, final UnsafeBuffer directBuffer, final MessageHeaderEncoder messageHeaderEncoder) {
-        car.wrapAndApplyHeader(directBuffer, 0, messageHeaderEncoder)
-                .serialNumber(1234)
-                .modelYear(2013)
-                .available(BooleanType.T)
-                .code(Model.A)
-                .putVehicleCode(VEHICLE_CODE, 0);
 
-        car.putSomeNumbers(1, 2, 3, 4);
 
-        car.extras()
-                .clear()
-                .cruiseControl(true)
-                .sportsPack(true)
-                .sunRoof(false);
-
-        car.engine()
-                .capacity(2000)
-                .numCylinders((short) 4)
-                .putManufacturerCode(MANUFACTURER_CODE, 0)
-                .efficiency((byte) 35)
-                .boosterEnabled(BooleanType.T)
-                .booster().boostType(BoostType.NITROUS).horsePower((short) 200);
-
-        car.fuelFiguresCount(3)
-                .next().speed(30).mpg(35.9f).usageDescription("Urban Cycle")
-                .next().speed(55).mpg(49.0f).usageDescription("Combined Cycle")
-                .next().speed(75).mpg(40.0f).usageDescription("Highway Cycle");
-
-        final CarEncoder.PerformanceFiguresEncoder figures = car.performanceFiguresCount(2);
-        figures.next()
-                .octaneRating((short) 95)
-                .accelerationCount(3)
-                .next().mph(30).seconds(4.0f)
-                .next().mph(60).seconds(7.5f)
-                .next().mph(100).seconds(12.2f);
-        figures.next()
-                .octaneRating((short) 99)
-                .accelerationCount(3)
-                .next().mph(30).seconds(3.8f)
-                .next().mph(60).seconds(7.1f)
-                .next().mph(100).seconds(11.8f);
-
-        // An exception will be raised if the string length is larger than can be encoded in the varDataEncoding field
-        // Please use a suitable schema type for varDataEncoding.length: uint8 <= 254, uint16 <= 65534
-        car.manufacturer(new String(MANUFACTURER, StandardCharsets.UTF_8))
-                .putModel(MODEL, 0, MODEL.length)
-                .putActivationCode(ACTIVATION_CODE, 0, ACTIVATION_CODE.capacity());
-
-        return MessageHeaderEncoder.ENCODED_LENGTH + car.encodedLength();
-    }
 }

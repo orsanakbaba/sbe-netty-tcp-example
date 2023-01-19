@@ -28,7 +28,7 @@ public class SimpleClientMain {
             b.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
-                    ch.pipeline().addLast(new SimpleKaitaiDecoder(), new SimpleClientHandler());
+                    ch.pipeline().addLast(new SimpleNettySbeEncoder(), new SimpleClientHandler());
                 }
             });
 
@@ -41,5 +41,6 @@ public class SimpleClientMain {
             workerGroup.shutdownGracefully();
         }
     }
+
 
 }
