@@ -1,6 +1,7 @@
 package tr.com.orsan.academy.learning.netty.sbe.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -54,26 +55,17 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
         channels.add(ctx.channel());
     }
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) { // (2)
-        /*final ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
+    private ByteBuf tmp;
 
-        final ChannelFuture f = ctx.writeAndFlush(nettyBuffer); // (3)
-        f.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) {
-                assert f == future;
-                ctx.close();
-            }
-        }); // (4)
-        //((ByteBuf) msg).release(); // (3)
-         */
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) {
+        System.out.println("Handler added");
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        super.channelReadComplete(ctx);
-        ctx.flush();
+    public void handlerRemoved(ChannelHandlerContext ctx) {
+        System.out.println("Handler removed");
+
     }
 
     @Override
@@ -97,8 +89,8 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
                                     .addLast(this);
                         }
                     })
-                    .option(ChannelOption.SO_BACKLOG, 128)          // (5)
                     .handler(new LoggingHandler(LogLevel.INFO))
+                    .option(ChannelOption.SO_BACKLOG, 128)          // (5)
                     .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 
             // Bind and start to accept incoming connections.
