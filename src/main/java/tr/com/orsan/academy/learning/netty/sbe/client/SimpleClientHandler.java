@@ -64,7 +64,7 @@ public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
                 ctx.close();
             }
         }); // (4)
-        ctx.writeAndFlush(nettyBuffer);
+        //ctx.writeAndFlush(nettyBuffer);
     }
 
     @Override

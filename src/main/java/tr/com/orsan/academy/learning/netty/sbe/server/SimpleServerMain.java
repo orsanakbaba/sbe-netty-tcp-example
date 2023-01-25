@@ -86,7 +86,7 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new SimpleNettySbeDecoder())
-                                    .addLast(this);
+                                    .addLast((ChannelInboundHandlerAdapter) this);
                         }
                     })
                     .handler(new LoggingHandler(LogLevel.INFO))

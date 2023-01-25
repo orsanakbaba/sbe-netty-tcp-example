@@ -28,8 +28,10 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
 
         }
 
-        final ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
-        in.readBytes(byteBuffer);
+        final ByteBuffer byteBuffer = ByteBuffer.allocate(in.readableBytes());
+        //in.readBytes(byteBuffer);
+        in.getBytes(0, byteBuffer);
+        //byteBuffer.put(in.array());
 
         final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
 
