@@ -1,7 +1,6 @@
 package tr.com.orsan.academy.learning.netty.sbe.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -15,12 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleServerMain extends ChannelInboundHandlerAdapter {
-
     private static final Logger logger = LogManager.getLogger(SimpleServerMain.class);
     private int port;
     private int[][] myInputArr;
     static final List<Channel> channels = new ArrayList<Channel>();
-
 
     public SimpleServerMain(int port, int numbRow, int numbColumn) {
         this.port = port;
@@ -47,34 +44,25 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
 
         new SimpleServerMain(port, 10, 10).run();
     }
-
     @Override
     public void channelActive(final ChannelHandlerContext ctx) { // (1)
-
         logger.debug("Client joined - " + ctx);
         channels.add(ctx.channel());
     }
-
-    private ByteBuf tmp;
-
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         System.out.println("Handler added");
     }
-
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
         System.out.println("Handler removed");
-
     }
-
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
         // Close the connection when an exception is raised.
         cause.printStackTrace();
         ctx.close();
     }
-
     public void run() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -85,7 +73,8 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
                     .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new SimpleNettySbeDecoder())
+                            ch.pipeline()
+                                    .addLast(new SimpleNettySbeDecoder())
                                     .addLast((ChannelInboundHandlerAdapter) this);
                         }
                     })
@@ -107,8 +96,4 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
             bossGroup.shutdownGracefully();
         }
     }
-
-
-
-
 }

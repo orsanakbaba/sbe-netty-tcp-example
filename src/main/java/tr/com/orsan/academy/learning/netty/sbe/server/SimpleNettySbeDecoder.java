@@ -16,51 +16,37 @@ import java.util.List;
 
 public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
     private static final Logger logger = LogManager.getLogger(SimpleNettySbeDecoder.class);
-
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-
 
         if (in.readableBytes() < MessageHeaderDecoder.ENCODED_LENGTH + CarDecoder.BLOCK_LENGTH) {
             ChannelFuture future = ctx.writeAndFlush(null);
             future.addListener(ChannelFutureListener.CLOSE);
             return;
-
         }
-
         final ByteBuffer byteBuffer = ByteBuffer.allocate(in.readableBytes());
-        //in.readBytes(byteBuffer);
-        in.getBytes(0, byteBuffer);
-        //byteBuffer.put(in.array());
+        in.readBytes(byteBuffer);
 
         final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
-
         final MessageHeaderDecoder messageHeaderDecoder = new MessageHeaderDecoder();
-
         final CarDecoder carDecoder = new CarDecoder();
-
         final int bufferOffset = 0;
         messageHeaderDecoder.wrap(directBuffer, bufferOffset);
-
         if (messageHeaderDecoder.schemaId() != CarEncoder.SCHEMA_ID) {
             throw new IllegalStateException("Schema ids do not match");
         }
-
         // Lookup the applicable flyweight to decode this type of message based on templateId and version.
         final int templateId = messageHeaderDecoder.templateId();
         if (templateId != CarEncoder.TEMPLATE_ID) {
             throw new IllegalStateException("Template ids do not match");
         }
-
         try {
             decode(carDecoder, directBuffer, messageHeaderDecoder);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         out.add(carDecoder);
-
     }
-
     public static void decode(
             final CarDecoder car, final UnsafeBuffer directBuffer, final MessageHeaderDecoder headerDecoder)
             throws Exception {
@@ -68,7 +54,6 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
         final StringBuilder sb = new StringBuilder();
 
         car.wrapAndApplyHeader(directBuffer, 0, headerDecoder);
-
         sb.append("\ncar.serialNumber=").append(car.serialNumber());
         sb.append("\ncar.modelYear=").append(car.modelYear());
         sb.append("\ncar.available=").append(car.available());

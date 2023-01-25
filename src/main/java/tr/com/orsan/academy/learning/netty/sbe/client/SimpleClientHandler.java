@@ -16,14 +16,12 @@ import java.nio.charset.StandardCharsets;
 
 public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LogManager.getLogger(SimpleClientHandler.class);
-
     private static final String ENCODING_FILENAME = "sbe.encoding.filename";
     private static final byte[] VEHICLE_CODE;
     private static final byte[] MANUFACTURER_CODE;
     private static final byte[] MANUFACTURER;
     private static final byte[] MODEL;
     private static final UnsafeBuffer ACTIVATION_CODE;
-
     static {
         try {
             VEHICLE_CODE = "abcdef".getBytes(CarEncoder.vehicleCodeCharacterEncoding());
@@ -35,7 +33,6 @@ public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
             throw new RuntimeException(ex);
         }
     }
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         //super.channelActive(ctx);
@@ -64,16 +61,11 @@ public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
                 ctx.close();
             }
         }); // (4)
-        //ctx.writeAndFlush(nettyBuffer);
     }
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);
-
     }
-
-
     public int encodeCar(
             final CarEncoder car, final UnsafeBuffer directBuffer, final MessageHeaderEncoder messageHeaderEncoder) {
         car.wrapAndApplyHeader(directBuffer, 0, messageHeaderEncoder)
