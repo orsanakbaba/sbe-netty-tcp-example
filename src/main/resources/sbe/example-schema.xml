@@ -48,6 +48,7 @@
             <choice name="cruiseControl">2</choice>
         </set>
     </types>
+    <!-- sbe:message name="Car" id="1" description="Description of a basic Car" blockLength="199" -->
     <sbe:message name="Car" id="1" description="Description of a basic Car">
         <field name="serialNumber" id="1" type="uint64"/>
         <field name="modelYear" id="2" type="ModelYear"/>

@@ -116,6 +116,10 @@ public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
                 .putModel(MODEL, 0, MODEL.length)
                 .putActivationCode(ACTIVATION_CODE, 0, ACTIVATION_CODE.capacity());
 
+        logger.debug("sbeBlockLength of the car message: " + car.sbeBlockLength());
+        logger.debug("encodedLength of the car message: " + car.encodedLength());
+        logger.debug("MessageHeaderEncoder.ENCODED_LENGTH + encodedLength of the car message: " + (MessageHeaderEncoder.ENCODED_LENGTH + car.encodedLength()));
+
         return MessageHeaderEncoder.ENCODED_LENGTH + car.encodedLength();
     }
 }

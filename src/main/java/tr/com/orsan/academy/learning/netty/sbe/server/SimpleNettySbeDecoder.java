@@ -21,10 +21,9 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
         super();
         this.setSingleDecode(false);
     }
-
-
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+
 
         if (in.readableBytes() < MessageHeaderDecoder.ENCODED_LENGTH + CarDecoder.BLOCK_LENGTH) {
             ChannelFuture future = ctx.writeAndFlush(null);
