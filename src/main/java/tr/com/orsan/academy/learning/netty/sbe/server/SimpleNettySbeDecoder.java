@@ -16,6 +16,13 @@ import java.util.List;
 
 public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
     private static final Logger logger = LogManager.getLogger(SimpleNettySbeDecoder.class);
+
+    protected SimpleNettySbeDecoder() {
+        super();
+        this.setSingleDecode(false);
+    }
+
+
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
@@ -46,6 +53,8 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
             throw new RuntimeException(e);
         }
         out.add(carDecoder);
+
+        ctx.channel().flush();
     }
     public static void decode(
             final CarDecoder car, final UnsafeBuffer directBuffer, final MessageHeaderDecoder headerDecoder)
@@ -121,4 +130,31 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
 
         logger.debug(sb.toString());
     }
+
+
+    @Override
+    public void channelActive(final ChannelHandlerContext ctx) throws Exception { // (1)
+        logger.debug("Client joined... - " + ctx.name());
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        logger.debug("Client left.... -" + ctx.name());
+        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) {
+        logger.debug("Handler added");
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
+        // Close the connection when an exception is raised.
+        cause.printStackTrace();
+        ctx.close();
+    }
+
+
 }

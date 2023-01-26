@@ -1,7 +1,10 @@
 package tr.com.orsan.academy.learning.netty.sbe.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -10,14 +13,10 @@ import io.netty.handler.logging.LoggingHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class SimpleServerMain extends ChannelInboundHandlerAdapter {
+public class SimpleServerMain {
     private static final Logger logger = LogManager.getLogger(SimpleServerMain.class);
     private int port;
     private int[][] myInputArr;
-    static final List<Channel> channels = new ArrayList<Channel>();
 
     public SimpleServerMain(int port, int numbRow, int numbColumn) {
         this.port = port;
@@ -44,25 +43,7 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
 
         new SimpleServerMain(port, 10, 10).run();
     }
-    @Override
-    public void channelActive(final ChannelHandlerContext ctx) { // (1)
-        logger.debug("Client joined - " + ctx);
-        channels.add(ctx.channel());
-    }
-    @Override
-    public void handlerAdded(ChannelHandlerContext ctx) {
-        System.out.println("Handler added");
-    }
-    @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) {
-        System.out.println("Handler removed");
-    }
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
-        // Close the connection when an exception is raised.
-        cause.printStackTrace();
-        ctx.close();
-    }
+
     public void run() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -73,9 +54,7 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
                     .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline()
-                                    .addLast(new SimpleNettySbeDecoder())
-                                    .addLast((ChannelInboundHandlerAdapter) this);
+                            ch.pipeline().addLast(new SimpleNettySbeDecoder());
                         }
                     })
                     .handler(new LoggingHandler(LogLevel.INFO))
@@ -84,7 +63,7 @@ public class SimpleServerMain extends ChannelInboundHandlerAdapter {
 
             // Bind and start to accept incoming connections.
 
-            ChannelFuture f = b.bind("localhost", this.port).sync(); // (7)
+            ChannelFuture f = b.bind("127.0.0.1", this.port).sync(); // (7)
             logger.debug("Netty Server started.");
 
             // Wait until the server socket is closed.
