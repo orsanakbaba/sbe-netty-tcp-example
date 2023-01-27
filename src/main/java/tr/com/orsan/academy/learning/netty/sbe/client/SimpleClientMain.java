@@ -32,8 +32,8 @@ public class SimpleClientMain {
             b.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
-                    ch.pipeline().addLast(new SimpleClientHandler());
                     ch.pipeline().addLast(new SimpleNettySbeEncoder());
+                    ch.pipeline().addLast(new SimpleClientHandler());
                 }
             });
 

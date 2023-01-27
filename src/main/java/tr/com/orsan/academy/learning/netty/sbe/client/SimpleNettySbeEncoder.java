@@ -22,6 +22,8 @@ public class SimpleNettySbeEncoder extends MessageToByteEncoder { // (1)
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
         logger.debug("SimpleNettySbeEncoder.MessageToByteEncoder.encode() method visited");
+        ByteBuf byteBuf = (ByteBuf) msg;
+        out.writeBytes(byteBuf);
     }
 
     @Override

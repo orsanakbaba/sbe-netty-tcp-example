@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 
 public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LogManager.getLogger(SimpleClientHandler.class);
-    private static final String ENCODING_FILENAME = "sbe.encoding.filename";
     private static final byte[] VEHICLE_CODE;
     private static final byte[] MANUFACTURER_CODE;
     private static final byte[] MANUFACTURER;
