@@ -26,13 +26,14 @@ public class SimpleClientMain {
             Bootstrap b = new Bootstrap(); // (1)
             b.group(workerGroup); // (2)
             b.channel(NioSocketChannel.class); // (3)
-            b.option(ChannelOption.SO_KEEPALIVE, true); // (4)
+            b.option(ChannelOption.SO_KEEPALIVE, true);
+            b.option(ChannelOption.SO_TIMEOUT, 3);// (4)
             b.handler(new LoggingHandler(LogLevel.INFO));
             b.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
-                    ch.pipeline().addLast(new SimpleClientHandler());
                     ch.pipeline().addLast(new SimpleNettySbeEncoder());
+                    ch.pipeline().addLast(new SimpleClientHandler());
                 }
             });
 

@@ -17,6 +17,10 @@ import java.util.List;
 public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
     private static final Logger logger = LogManager.getLogger(SimpleNettySbeDecoder.class);
 
+    protected SimpleNettySbeDecoder() {
+        super();
+        this.setSingleDecode(false);
+    }
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
@@ -25,33 +29,23 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
             ChannelFuture future = ctx.writeAndFlush(null);
             future.addListener(ChannelFutureListener.CLOSE);
             return;
-
         }
-
         final ByteBuffer byteBuffer = ByteBuffer.allocate(in.readableBytes());
-        //in.readBytes(byteBuffer);
-        in.getBytes(0, byteBuffer);
-        //byteBuffer.put(in.array());
+        in.readBytes(byteBuffer);
 
         final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
-
         final MessageHeaderDecoder messageHeaderDecoder = new MessageHeaderDecoder();
-
         final CarDecoder carDecoder = new CarDecoder();
-
         final int bufferOffset = 0;
         messageHeaderDecoder.wrap(directBuffer, bufferOffset);
-
         if (messageHeaderDecoder.schemaId() != CarEncoder.SCHEMA_ID) {
             throw new IllegalStateException("Schema ids do not match");
         }
-
         // Lookup the applicable flyweight to decode this type of message based on templateId and version.
         final int templateId = messageHeaderDecoder.templateId();
         if (templateId != CarEncoder.TEMPLATE_ID) {
             throw new IllegalStateException("Template ids do not match");
         }
-
         try {
             decode(carDecoder, directBuffer, messageHeaderDecoder);
         } catch (Exception e) {
@@ -59,8 +53,8 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
         }
         out.add(carDecoder);
 
+        ctx.channel().flush();
     }
-
     public static void decode(
             final CarDecoder car, final UnsafeBuffer directBuffer, final MessageHeaderDecoder headerDecoder)
             throws Exception {
@@ -68,7 +62,6 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
         final StringBuilder sb = new StringBuilder();
 
         car.wrapAndApplyHeader(directBuffer, 0, headerDecoder);
-
         sb.append("\ncar.serialNumber=").append(car.serialNumber());
         sb.append("\ncar.modelYear=").append(car.modelYear());
         sb.append("\ncar.available=").append(car.available());
@@ -136,4 +129,31 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
 
         logger.debug(sb.toString());
     }
+
+
+    @Override
+    public void channelActive(final ChannelHandlerContext ctx) throws Exception { // (1)
+        logger.debug("Client joined... - " + ctx.name());
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        logger.debug("Client left.... -" + ctx.name());
+        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) {
+        logger.debug("Handler added");
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
+        // Close the connection when an exception is raised.
+        cause.printStackTrace();
+        ctx.close();
+    }
+
+
 }
