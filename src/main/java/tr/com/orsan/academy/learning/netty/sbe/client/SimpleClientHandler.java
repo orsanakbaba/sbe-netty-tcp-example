@@ -39,18 +39,15 @@ public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
 
         final ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
         final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
-
         final MessageHeaderEncoder messageHeaderEncoder = new MessageHeaderEncoder();
-
         final CarEncoder carEncoder = new CarEncoder();
-
         final int encodingLengthPlusHeader = encodeCar(carEncoder, directBuffer, messageHeaderEncoder);
+        messageHeaderEncoder.totalLength(encodingLengthPlusHeader);
+        messageHeaderEncoder.wrap(directBuffer, 0);
 
-        final ByteBuf nettyBuffer = ctx.alloc().buffer(encodingLengthPlusHeader); // (2)
-
+        final ByteBuf nettyBuffer = ctx.alloc().buffer(encodingLengthPlusHeader);// (2)
         byteBuffer.limit(encodingLengthPlusHeader);
         nettyBuffer.writeBytes(byteBuffer);
-
         final ChannelFuture f = ctx.writeAndFlush(nettyBuffer); // (3)
         f.addListener(new ChannelFutureListener() {
             @Override

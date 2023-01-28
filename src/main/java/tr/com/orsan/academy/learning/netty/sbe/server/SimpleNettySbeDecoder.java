@@ -1,8 +1,6 @@
 package tr.com.orsan.academy.learning.netty.sbe.server;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.agrona.concurrent.UnsafeBuffer;
@@ -16,7 +14,7 @@ import java.util.List;
 
 public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
     private static final Logger logger = LogManager.getLogger(SimpleNettySbeDecoder.class);
-
+    private ByteBuf byteBuf;
     protected SimpleNettySbeDecoder() {
         super();
         this.setSingleDecode(false);
@@ -24,20 +22,16 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
-
-        if (in.readableBytes() < MessageHeaderDecoder.ENCODED_LENGTH + CarDecoder.BLOCK_LENGTH) {
-            ChannelFuture future = ctx.writeAndFlush(null);
-            future.addListener(ChannelFutureListener.CLOSE);
-            return;
-        }
+        final MessageHeaderDecoder messageHeaderDecoder = new MessageHeaderDecoder();
         final ByteBuffer byteBuffer = ByteBuffer.allocate(in.readableBytes());
+        final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
+
         in.readBytes(byteBuffer);
 
-        final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
-        final MessageHeaderDecoder messageHeaderDecoder = new MessageHeaderDecoder();
         final CarDecoder carDecoder = new CarDecoder();
         final int bufferOffset = 0;
         messageHeaderDecoder.wrap(directBuffer, bufferOffset);
+
         if (messageHeaderDecoder.schemaId() != CarEncoder.SCHEMA_ID) {
             throw new IllegalStateException("Schema ids do not match");
         }
@@ -140,12 +134,14 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         logger.debug("Client left.... -" + ctx.name());
+        this.byteBuf.release();
         super.channelInactive(ctx);
     }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         logger.debug("Handler added");
+        byteBuf = ctx.alloc().buffer(MessageHeaderDecoder.ENCODED_LENGTH);
     }
 
     @Override
@@ -155,5 +151,24 @@ public class SimpleNettySbeDecoder extends ByteToMessageDecoder {
         ctx.close();
     }
 
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
+        ByteBuf in = (ByteBuf) msg;
+        in.getBytes(0, this.byteBuf, MessageHeaderDecoder.ENCODED_LENGTH);
+
+        final MessageHeaderDecoder messageHeaderDecoder = new MessageHeaderDecoder();
+        final ByteBuffer byteBuffer = ByteBuffer.allocate(MessageHeaderDecoder.ENCODED_LENGTH);
+        final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
+        this.byteBuf.readBytes(byteBuffer);
+        final int bufferOffset = 0;
+        messageHeaderDecoder.wrap(directBuffer, bufferOffset);
+
+        if (in.readableBytes() < messageHeaderDecoder.totalLength()) {
+            this.byteBuf.clear();
+
+            return;
+        }
+        super.channelRead(ctx, msg);
+    }
 }
